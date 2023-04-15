@@ -16,7 +16,7 @@ const CreatePost = () => {
   const [loading, setLoading] = useState(false);
 
   const generateImg = async () => {
-    if(form.prompt){
+    if (form.prompt) {
       try {
         setGeneratingImg(true);
         const response = await fetch('http://localhost:8080/api/v1/dalle', {
@@ -24,14 +24,14 @@ const CreatePost = () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({prompt: form.prompt})
+          body: JSON.stringify({ prompt: form.prompt })
         })
 
         const data = await response.json();
-        setForm({...form, photo: `data:image/jpeg;base64,${data.photo}`})
+        setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` })
       } catch (error) {
         alert(error)
-        
+
       } finally {
         setGeneratingImg(false)
       }
@@ -39,9 +39,36 @@ const CreatePost = () => {
       alert('Please entar a prompt')
     }
   };
-  const handleSubmit = () => {};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (form.prompt && form.photo) {
+      setLoading(true);
+
+      try {
+        const response = await fetch('http://localhost:8080/api/v1/post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(form)
+        })
+
+        await response.json();
+        navigate('/');
+      } catch (error) {
+        console.log(error)
+        alert(error);
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      alert('Please enter a prompt and generate an image')
+    }
+
+  };
   const handleChange = (e) => {
-    setForm({...form, [e.target.name]: e.target.value})
+    setForm({ ...form, [e.target.name]: e.target.value })
   };
   const handleSurpriseMe = () => {
     const randomPrompt = getRandomPrompt(form.prompt);
@@ -111,15 +138,15 @@ const CreatePost = () => {
         </div>
 
         <div className="mt-10">
-            <p className="mt-2 text-[#666e75] text-[14px]">
-              Once you have created the image you want, you can share it with others in the community
-            </p>
-            <button
-              type="submit"
-              className="mt-3 text-white bg-[#6469ff] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-            >
-              {loading ? 'Sharing...' : 'Share with the community'}
-            </button>
+          <p className="mt-2 text-[#666e75] text-[14px]">
+            Once you have created the image you want, you can share it with others in the community
+          </p>
+          <button
+            type="submit"
+            className="mt-3 text-white bg-[#6469ff] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+          >
+            {loading ? 'Sharing...' : 'Share with the community'}
+          </button>
         </div>
       </form>
     </section>
